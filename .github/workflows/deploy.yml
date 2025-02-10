@@ -21,23 +21,27 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
 
-    # Paso 3: Compilar el proyecto con Maven
+    # Paso 3: Dar permisos de ejecución al archivo mvnw
+    - name: Make mvnw executable
+      run: chmod +x mvnw
+
+    # Paso 4: Compilar el proyecto con Maven
     - name: Build the application
       run: ./mvnw clean package
 
-    # Paso 4: Agregar permisos explícitos para Docker
+    # Paso 5: Agregar permisos explícitos para Docker
     - name: Set up Docker permissions
       run: |
         sudo chmod 666 /var/run/docker.sock
 
-    # Paso 5: Construir la imagen Docker
+    # Paso 6: Construir la imagen Docker
     - name: Build Docker Image
       run: |
         docker build -t office-list:latest .
         sudo docker save office-list:latest > office-list.tar
         sudo chmod 644 office-list.tar
 
-    # Paso 6: Transferir la imagen Docker a la instancia EC2
+    # Paso 7: Transferir la imagen Docker a la instancia EC2
     - name: Transfer Docker Image
       uses: appleboy/scp-action@v0.1.6
       with:
@@ -47,7 +51,7 @@ jobs:
         source: office-list.tar
         target: /home/ec2-user/
 
-    # Paso 7: Conectarse a la instancia EC2 y desplegar
+    # Paso 8: Conectarse a la instancia EC2 y desplegar
     - name: SSH to EC2 and Deploy
       uses: appleboy/ssh-action@v0.1.6
       with:
